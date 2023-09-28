@@ -84,6 +84,7 @@ async def create_product(product: Product):
 
     return {
         "message": "Produto criado com sucesso",
+        "id": product.id,
     }
 
 
