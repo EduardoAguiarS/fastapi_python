@@ -1,6 +1,22 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field, create_engine, Session
-from fastapi import FastAPI, status
+from fastapi.security.api_key import APIKeyHeader
+from fastapi import FastAPI, status, Security, HTTPException
+
+
+API_KEY = "123asd"
+API_KEY_NAME = "Authorization"
+api_key_header_auth = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
+
+
+def get_api_key(api_key_header: str = Security(api_key_header_auth)):
+    if api_key_header == API_KEY:
+        return api_key_header
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials"
+        )
+
 
 app = FastAPI()
 
@@ -34,6 +50,11 @@ async def home():
     return {
         "message": "API de Produtos by FastAPI",
     }
+
+
+@app.get("/users/", dependencies=[Security(get_api_key)])
+async def read_users():
+    return [{"name": "Eduardo"}]
 
 
 # Return all products
